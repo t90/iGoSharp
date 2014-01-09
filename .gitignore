@@ -1,0 +1,11 @@
+*.dll
+*.exe
+**/bin
+**/obj
+*.user
+*.suo
+*.7z
+*.log
+*.dll
+*.swp
+.gitignore
