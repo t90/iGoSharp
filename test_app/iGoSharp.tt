@@ -1,6 +1,15 @@
-﻿<#@ template debug="false" hostspecific="false" language="C#" #>
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
 <#@ assembly name="System.Core" #>
+<#@ assembly Name="$(ProjectDir)..\iGoSharp\bin\Debug\iGoSharp.dll" #>
+<#@ assembly Name="$(ProjectDir)..\Interfaces\bin\Debug\Interfaces.dll" #>
+<#@ import namespace="System" #>
+<#@ import namespace="System.IO" #>
 <#@ import namespace="System.Linq" #>
 <#@ import namespace="System.Text" #>
 <#@ import namespace="System.Collections.Generic" #>
 <#@ output extension=".cs" #>
+<#
+	var projectDir = new DirectoryInfo(Host.ResolvePath(@".")).FullName;
+	var iGoSharp = new iGoSharp.World(typeof(Interfaces.IWriteLine),typeof(TextWriter));
+	
+#>

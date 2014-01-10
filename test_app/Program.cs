@@ -20,6 +20,7 @@ namespace test_app
 
     public static class Extensions
     {
+
         public static IWriteLine GoIWriteLine(this TextWriter tw)
         {
             return new TextWriterGoFacade(tw);
