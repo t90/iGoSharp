@@ -15,7 +15,13 @@ namespace iGoSharp
 
             foreach (var element in elements)
             {
-                (dictionary[keyFunc(element)] = dictionary[keyFunc(element)] ?? new List<Value>()).Add(valueFunc(element));
+                List<Value> valueList;
+                if (!dictionary.TryGetValue(keyFunc(element), out valueList))
+                {
+                    valueList = new List<Value>();
+                    dictionary.Add(keyFunc(element), valueList);
+                }
+                valueList.Add(valueFunc(element));
             }
 
             return dictionary;
@@ -28,6 +34,8 @@ namespace iGoSharp
         private readonly Type _classFromClassLibrary;
         private Dictionary<Type, InterfaceInfo> _interfaces;
         private IEnumerable<ClassInfo> _classes;
+        private Dictionary<MethodInfo, List<InterfaceInfo>> _methods;
+        private Dictionary<PropertyInfo, List<InterfaceInfo>> _properties;
 
         public World(Type interfaceFromInterfaceLibrary, Type classFromClassLibrary)
         {
@@ -54,36 +62,54 @@ namespace iGoSharp
                     Properties = c.GetProperties()
                 }).ToArray();
 
-            var methods = _interfaces
+            _methods = _interfaces
                 .Values.SelectMany(i => i
                     .Methods.Select(m => new
                     {
                         Interface = i, 
                         Method = m
                     }))
-                .ToListDictionary(i => i.Method, i => i);
+                .ToListDictionary(i => i.Method, i => i.Interface);
 
-            var properties = _interfaces
+            _properties = _interfaces
                 .Values.SelectMany(i => i.Properties
                     .Select(p => new
                     {
                         Interface = i,
                         Property = p
                     }))
-                .ToListDictionary(i => i.Property, i => i);
-
-//            _classes
-//                .Select(c => c.Methods
-//                    .Select(m => new{ Method = m, Class = c }) )
-//                .SelectMany(i => i)
-//                .Select(i => i.Class.Properties
-//                    .Select(p => new { Property = p, Class = i.Class, Method = i.Method }))
-//                .SelectMany(i => i).Where(flatClassInfo => )
+                .ToListDictionary(i => i.Property, i => i.Interface);
 
 
         }
 
+        public static Dictionary<string, List<Type>> GetMethodNameToTypes(Type[] inTypes)
+        {
+            return 
+            inTypes
+                .Select(t => new {Type = t, Methods = t.GetMethods()})
+                .SelectMany(i => i.Methods
+                    .Select(m => new
+                    {
+                        MethodSignature = string.Format("{0} {1}{2}({3})",
+                            m.ReturnType.FullName,
+                            m.Name,
+                            !m.IsGenericMethodDefinition ? "" : "`" + m.GetGenericArguments().Length,
+                            string.Join(",", m.GetParameters().Select(p => p.ParameterType.FullName).ToArray())), 
+                        Type = i.Type
+                    })
+                ).ToListDictionary(i => i.MethodSignature, i => i.Type);
+        }
 
+        public IEnumerable<Tuple<ClassInfo, IEnumerable<InterfaceInfo>>> DuckType()
+        {
+            return _classes.Select(classInfo => new Tuple<ClassInfo, IEnumerable<InterfaceInfo>>(classInfo, GetInterfacesForClass(classInfo, _methods,_properties)));
+        }
+
+        private IEnumerable<InterfaceInfo> GetInterfacesForClass(ClassInfo classInfo, Dictionary<MethodInfo, List<InterfaceInfo>> interfaces, Dictionary<PropertyInfo, List<InterfaceInfo>> properties)
+        {
+            throw new NotImplementedException();
+        }
 
     }
 

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using iGo;
 using Interfaces;
 
 namespace test_app
@@ -7,7 +8,7 @@ namespace test_app
     {
         static void Main(string[] args)
         {
-            var i = System.Console.Out.GoIWriteLine();
+            var i = System.Console.Out.xInterfacesIWriteLine();
             Print(i);
         }
 
@@ -18,30 +19,7 @@ namespace test_app
 
     }
 
-    public static class Extensions
-    {
 
-        public static IWriteLine GoIWriteLine(this TextWriter tw)
-        {
-            return new TextWriterGoFacade(tw);
-        }
-    }
-
-    public class TextWriterGoFacade : IWriteLine
-    {
-        private readonly TextWriter _obj;
-
-        public TextWriterGoFacade(TextWriter obj)
-        {
-            _obj = obj;
-        }
-
-        public void WriteLine(string format, params object[] args)
-        {
-            _obj.WriteLine(format,args);
-        }
-
-    }
 
 
 }
