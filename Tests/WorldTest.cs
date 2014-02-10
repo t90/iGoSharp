@@ -23,14 +23,51 @@ namespace Tests
         public void MyMethod(){}
     }
 
+    public interface Interface1
+    {
+        void MyMethod<T>();
+    }
+
+    public interface Interface2
+    {
+        void Z();
+    }
+
+    public interface Inteface3
+    {
+        void Z();
+        void MyMethod();
+    }
+
     [TestFixture]
     public class WorldTest
     {
         [Test]
-        public void GetMethodNameToTypes()
+        public void MethodToTypesReturnCorrectNumberOfInstances()
         {
             var methodNameToTypes = World.GetMethodNameToTypes(new []{typeof(Type1),typeof(Type2)});
             Assert.AreEqual(2, methodNameToTypes["System.Void MyMethod()"].Count);
+        }
+
+        [Test]
+        public void TestSimpleMethodNameSignatureCreation()
+        {
+            Assert.AreEqual(
+                "System.Void MyMethod()",
+                World.GetMethodSignature(typeof (Type2).GetMethods().Where(m => m.Name == "MyMethod").First())
+                );
+        }
+
+        [Test]
+        public void TestProperDuckTyping()
+        {
+            var world = new World
+                (
+                    classes: new []{typeof(Type1),typeof(Type2)},
+                    interfaces: new []{ typeof(Interface1), typeof(Interface2), typeof(Inteface3) }
+                );
+            var duckTypeInterfaces = world.DuckTypeInterfaces();
+            Assert.AreEqual(typeof(Interface1),duckTypeInterfaces.First().Item2.First());
         }
     }
 }

@@ -1,7 +1,11 @@
-﻿namespace iGo{
+﻿using System.IO;
+using System.Text;
+using Interfaces;
+
+namespace iGo{
 public static class Extensions
 {
-    public class TextWriterProxy : Interfaces.IWriteLine
+    public class TextWriterProxy : TextWriter, Interfaces.IWriteLine
     {
         private readonly System.IO.TextWriter _inObject;
 
@@ -14,6 +18,13 @@ public static class Extensions
         {
             _inObject.WriteLine(format,args);
         }
+
+        public override Encoding Encoding
+        {
+            get { throw new System.NotImplementedException(); }
+        }
+
+
     }
 
     public static Interfaces.IWriteLine xInterfacesIWriteLine(this System.IO.TextWriter inObject)

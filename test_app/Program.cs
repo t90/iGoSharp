@@ -4,12 +4,13 @@ using Interfaces;
 
 namespace test_app
 {
+
     class Program
     {
         static void Main(string[] args)
         {
-            var i = System.Console.Out.xInterfacesIWriteLine();
-            Print(i);
+//            IWriteLine i = (IGo<TextWriter>)System.Console.Out;
+//            Print(i);
         }
 
         public static void Print(IWriteLine wl)
