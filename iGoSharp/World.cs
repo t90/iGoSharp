@@ -26,6 +26,12 @@ namespace iGoSharp
 
             return dictionary;
         }
+
+        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> inData)
+        {
+            var hashSet = new HashSet<T>(inData);
+            return hashSet;
+        }
     }
 
     public class World
@@ -48,7 +54,7 @@ namespace iGoSharp
 
             var methodsInInterfaces = GetMethodNameToTypes(_interfaces);
             var methodsInClasses = GetMethodNameToTypes(_classes);
-            var data =
+            var methodClassInterface =
                 (
             from i in methodsInInterfaces
             join c in methodsInClasses on i.Key equals c.Key into groupJoin
@@ -60,24 +66,33 @@ namespace iGoSharp
                 Class = (cj.Equals(default(KeyValuePair<string, List<Type>>)) ? null : cj.Value)
             }
                 ).ToList();
-            data.ToString();
 
-            /*
-                        var data =
-                            (
-                        from i in methodsInInterfaces
-                        join c in methodsInClasses on i.Key equals c.Key into groupJoin
-                        from c in groupJoin.DefaultIfEmpty()
-                        select new
-                        {
-                            Method = i.Key,
-                            Interface = i.Value, 
-                            Class = (c.Equals(default(KeyValuePair<string,List<Type>>)) ? null : c.Value )
-                        }
-                            ).ToList();
-                        data.ToString();
- 
-             */
+
+            var interfacesWithoutImplementation = methodClassInterface
+                .Where(mci => mci.Class == null)
+                .SelectMany(mci => mci.Interface)
+                .Distinct().ToHashSet();
+
+            var methodClassInterfaceClean = methodClassInterface
+                .Where(mci => mci.Class != null)
+                .Select(mci => new
+                {
+                    mci.Method, 
+                    mci.Class,
+                    Interface = mci.Interface.Where(i => !interfacesWithoutImplementation.Contains(i)).ToList()
+                }).ToList();
+
+            var classToMethods = methodClassInterfaceClean
+                .SelectMany(mci => mci.Class
+                    .Select(c => new
+                    {
+                        Class = c, 
+                        Method = mci.Method
+                    }))
+                .ToListDictionary(cm => cm.Class, cm => cm.Method);
+
+            classToMethods.ToString();
+
             return null;
         }
     
