@@ -82,6 +82,30 @@ namespace iGoSharp
                     Interface = mci.Interface.Where(i => !interfacesWithoutImplementation.Contains(i)).ToList()
                 }).ToList();
 
+            // needs something like
+            // method1 class1 interface1
+            // method2 class1 interface1
+            
+            var flatenned =
+            methodClassInterfaceClean
+                .SelectMany(m => m.Class
+                    .Select(i => new
+                    {
+                        m.Method,
+                        Class = i,
+                        Interfaces = m.Interface
+                    }))
+                .SelectMany(m => m.Interfaces
+                    .Select(i => new
+                    {
+                        m.Method,
+                        m.Class,
+                        Interface = i,
+                    })).OrderBy(i => i.Interface.FullName).ToList();
+                    
+
+
+
             var classToMethods = methodClassInterfaceClean
                 .SelectMany(mci => mci.Class
                     .Select(c => new
@@ -90,6 +114,8 @@ namespace iGoSharp
                         Method = mci.Method
                     }))
                 .ToListDictionary(cm => cm.Class, cm => cm.Method);
+
+
 
             classToMethods.ToString();
 
